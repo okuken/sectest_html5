@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <input id="confidential" type="text" value="confidential value">
+        <div>
+            Log: <span id="log"></span>
+        </div>
+
+        <script>
+
+            var vulnerable = true;
+
+            window.onload = function(e) {
+                var ws = new WebSocket('ws://localhost:9991/echo');
+                ws.onopen = function () {
+                    ws.onmessage = function(e) {
+                        if(vulnerable) {
+                            document.getElementById("log").innerHTML += " " + e.data; //XSS
+                            return;
+                        }
+
+                        document.getElementById("log").textContent += " " + e.data;
+                    };
+
+                    ws.send("test1");
+                    ws.send("test2");
+                    ws.send("XSS<img src=_ onerror=alert(document.getElementById('confidential').value)>");
+                };
+            };
+        </script>
+    </body>
+</html>

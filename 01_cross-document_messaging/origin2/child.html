@@ -1,0 +1,31 @@
+<html>
+    <body>
+        <!-- python -m http.server 9992 --directory ./origin2 -->
+        <h1>Origin 2</h1>
+        <input id="confidential" type="text" value="confidential value of Origin 2">
+        <div>
+            Log: <span id="log"></span>
+        </div>
+
+        <script>
+            var vulnerable = true;
+
+            window.onload = function(e) {
+                window.addEventListener("message", function(e) {
+                    if(vulnerable) {
+                        document.getElementById("log").innerHTML = e.data; //XSS
+                        e.source.postMessage("confidential message from Origin 2", "*"); //Exposure
+                        return;
+                    }
+
+                    if(e.origin !== "http://localhost:9991") {
+                        document.getElementById("log").textContent = "not allowed origin.";
+                        return;
+                    }
+                    document.getElementById("log").textContent = e.data;
+                    e.source.postMessage("confidential message from Origin 2", "http://localhost:9991");
+                });
+            };
+        </script>
+    </body>
+</html>

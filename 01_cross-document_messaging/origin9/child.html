@@ -1,0 +1,17 @@
+<html>
+    <body>
+        <!-- python -m http.server 9999 --directory ./origin9 -->
+        <h1>Origin 9 (Attacker's child site)</h1>
+        <div>
+            Log: <span id="log"></span>
+        </div>
+        <script>
+            window.onload = function(e) {
+                window.addEventListener("message", function(e) {
+                    document.getElementById("log").textContent = e.data;
+                    e.source.postMessage("XSS<img src=_ onerror=alert(document.getElementById('confidential').value)>", "*");
+                });
+            };
+        </script>
+    </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <!-- python -m http.server 9991 --directory ./origin1 -->
+        <h1>Origin 1</h1>
+        <input id="confidential" type="text" value="confidential value of Origin 1">
+        <div>
+            Log: <span id="log"></span>
+        </div>
+
+        <iframe id="frame" src="http://localhost:9992/child.html"></iframe>
+<!--    <iframe id="frame" src="http://localhost:9999/child.html"></iframe> -->
+
+        <script>
+
+            var vulnerable = true;
+
+            window.onload = function(e) {
+                window.addEventListener("message", function(e) {
+                    if(vulnerable) {
+                        document.getElementById("log").innerHTML = e.data; //XSS
+                        return;
+                    }
+
+                    if(e.origin !== "http://localhost:9992") {
+                        return;
+                    }
+                    document.getElementById("log").textContent = e.data;
+                });
+
+
+                if(vulnerable) {
+                    document.getElementById("frame").contentWindow.postMessage("confidential message from Origin 1.", "*"); //Exposure
+                    return;
+                }
+
+                document.getElementById("frame").contentWindow.postMessage("confidential message from Origin 1.", "http://localhost:9992");
+            }
+        </script>
+    </body>
+</html>
